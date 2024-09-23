@@ -12,7 +12,20 @@ services:
       - .env
     volumes:
       - .:/app
-    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    working_dir: /app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload-dir app
+  alembic:
+    build: .
+    container_name: alembic_migrations
+    depends_on:
+      - db
+    env_file:
+      - .env
+    volumes:
+      - .:/fastapi_social_network  
+    working_dir: /fastapi_social_network
+    entrypoint: ["sh", "-c"]  
+    command: ["alembic upgrade head"]  
 
   db:
     image: postgres:13
@@ -24,7 +37,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 

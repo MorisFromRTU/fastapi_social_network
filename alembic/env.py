@@ -6,10 +6,10 @@ import os
 import sys
 from dotenv import load_dotenv
 
-
 base_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 sys.path.append(base_dir)
-from app.db import Base
+from app.database import User
+from app import Base
 
 load_dotenv()
 
@@ -19,7 +19,7 @@ config = context.config
 target_metadata = Base.metadata
 
 def get_sync_url():
-    url = os.getenv("DATABASE_URL_SYNC")
+    url = os.getenv("DATABASE_URL")
     if not url:
         raise ValueError("DATABASE_URL не задана в файле .env или переменных окружения")
     return url.replace('postgresql+asyncpg', 'postgresql')
@@ -30,7 +30,7 @@ def run_migrations_online():
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
-
+    print(type(target_metadata))
     with connectable.connect() as connection:
         context.configure(
             connection=connection, target_metadata=target_metadata
@@ -39,7 +39,4 @@ def run_migrations_online():
         with context.begin_transaction():
             context.run_migrations()
 
-if context.is_offline_mode():
-    run_migrations_offline()
-else:
-    run_migrations_online()
+run_migrations_online()
