@@ -24,8 +24,7 @@ services:
     volumes:
       - .:/fastapi_social_network  
     working_dir: /fastapi_social_network
-    entrypoint: ["sh", "-c"]  
-    command: ["alembic upgrade head"]  
+    command: ["sh", "-c"]  
 
   db:
     image: postgres:13
