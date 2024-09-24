@@ -1,5 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime
-from datetime import timezone, datetime
+from sqlalchemy import Column, Integer, String, TIMESTAMP, func
 from app.db import Base
 
 class User(Base):
@@ -11,4 +10,5 @@ class User(Base):
     surname = Column(String(255), nullable=False)
     email = Column(String(255), unique=True, nullable=False)
     age = Column(Integer, nullable=True)
-    registered_at = Column(DateTime, default=datetime.now(timezone.utc))
+    registered_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
+    password = Column(String(255), nullable=False)
