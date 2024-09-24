@@ -12,7 +12,7 @@ async def authenticate_user(db: AsyncSession, username: str, password: str) -> d
             detail="User not found"
         )
     if not await security.verify_password(password, user.password):
-        return HTTPException(
+        raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Incorrect password"
         )
