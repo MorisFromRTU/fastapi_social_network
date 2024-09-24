@@ -4,21 +4,40 @@ from fastapi import HTTPException, status, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from .database import User
 from .security import verify_password
+from fastapi.security import OAuth2PasswordRequestForm
+from datetime import timedelta
+from . import security
 from .logger import logging
 
 
-async def authenticate_user(db: AsyncSession, username: str, password: str):
-    user: User = crud.get_user(db=db, username=username)
+async def authenticate_user(db: AsyncSession, username: str, password: str) -> User:
+    user: User = await crud.get_user(db=db, username=username)
     if not user:
-        return False
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
     if not verify_password(password, user.password):
-        return False
+        return HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Incorrect password"
+        )
     return user
+
+
+async def login_for_access_token(form_data: OAuth2PasswordRequestForm, db: AsyncSession):
+    user: User = await authenticate_user(username=form_data.username, password=form_data.password, db=db)
+    access_token_expire = timedelta(minutes=30)
+    access_token = await security.create_access_token(
+        data={"sub": user.username},expires_delta=access_token_expire)
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
+
 
 async def register_user(user: UserRegister, db: AsyncSession = Depends(db.get_db)):
     existing_user = await crud.get_user(db=db, username=user.username)
     if existing_user is not None:
-        print(existing_user)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Username already taken"

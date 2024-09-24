@@ -18,9 +18,9 @@ async def users(db: AsyncSession = Depends(get_db)):
 async def user(username: str, db: AsyncSession = Depends(get_db)):
     return await crud.get_user(db=db, username=username)
 
-@router.post('/token')
-async def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    return await security.login_for_access_token(form_data)
+@router.post('/login')
+async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):
+    return await auth.login_for_access_token(form_data=form_data, db=db)
 
 @router.post('/register')
 async def register(user: UserRegister, db: AsyncSession = Depends(get_db)):
