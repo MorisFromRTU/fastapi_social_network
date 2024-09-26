@@ -1,12 +1,17 @@
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from . import database, logger
-from fastapi import HTTPException, status
+from . import database, logger, schemas
+from fastapi import HTTPException, status, Depends
+
+
+async def get_items(db: AsyncSession, model):
+    query = select(model)
+    result = await db.execute(query)  
+    items = result.scalars().all()  
+    return items
 
 async def get_users(db: AsyncSession) -> list:
-    query = select(database.models.User)
-    result = await db.execute(query)  
-    users = result.scalars().all()  
+    users = await get_items(db=db, model=database.User)
     return users
 
 async def get_user_by_username(db: AsyncSession, username: str) -> database.models.User:
@@ -31,3 +36,19 @@ async def delete_user(db: AsyncSession, user_id: int):
     await db.delete(user)
     await db.commit()
     return {"message": "User has been deleted successfully"}
+
+
+async def get_posts(db: AsyncSession):
+    posts = await get_items(db=db, model=database.Post)
+    return posts
+
+async def create_post(db: AsyncSession, post_data: schemas.PostCreate):
+    post = database.Post(
+        title=post_data.title,
+        content=post_data.content,
+        author_id=post_data.author_id
+    )
+    db.add(post)
+    await db.commit()
+    await db.refresh(post)
+    return post

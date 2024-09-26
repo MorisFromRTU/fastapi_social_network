@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from datetime import datetime
 
-class UserItem(BaseModel):
+class User(BaseModel):
     id: int
     username: str
     name: str
@@ -9,6 +9,7 @@ class UserItem(BaseModel):
     email: str
     age: int
     registered_at: datetime
+
 
 class UserRegister(BaseModel):
     username: str

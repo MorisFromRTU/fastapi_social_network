@@ -14,6 +14,13 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
+async def get_access_token(token: str) -> dict:
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return payload
+    except jwt.PyJWTError:
+        return None
+
 async def create_access_token(data: dict, expires_delta: timedelta = timedelta(minutes=15)) -> str:
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) + expires_delta

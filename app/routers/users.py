@@ -30,3 +30,6 @@ async def login(form_data: schemas.UserLogin, db: AsyncSession = Depends(db.get_
 async def register(user: schemas.UserRegister, db: AsyncSession = Depends(db.get_db)):
     return await auth.register_user(db=db, user=user)
 
+@router.get('/token')
+async def get_user_by_token(token: str, db: AsyncSession = Depends(db.get_db)):
+    return await auth.get_current_user(token=token, db=db)

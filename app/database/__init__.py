@@ -1,3 +1,3 @@
 from .models import User
-
-__all__ = ["User"]
+from .models import Post
+__all__ = ["User", "Post"]
