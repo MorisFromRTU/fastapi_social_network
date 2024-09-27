@@ -12,3 +12,7 @@ class PostCreate(BaseModel):
     title: str
     content: str
     author_id: Optional[int] = None
+
+class PostUpdate(BaseModel):
+    title: str
+    content: str
