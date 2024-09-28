@@ -8,16 +8,8 @@ async def get_posts(db: AsyncSession):
     return posts
 
 async def get_post(db: AsyncSession, post_id: int) -> database.Post:
-    query = select(database.Post).filter(database.Post.id == post_id)
-    result = await db.execute(query)
-    post = result.scalars().first()
-    if post is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Post not found"
-        )
+    post = await crud.get_item(db=db, item_id=post_id, model=database.Post)
     return post
-        
 
 async def create_post(db: AsyncSession, post_data: schemas.PostCreate):
     post = database.Post(
