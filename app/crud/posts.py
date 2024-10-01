@@ -2,14 +2,19 @@ from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from .. import database, crud, schemas
 from fastapi import HTTPException, status
+from sqlalchemy.orm import selectinload
 
 async def get_posts(db: AsyncSession):
     posts = await crud.get_items(db=db, model=database.Post)
     return posts
 
-async def get_post(db: AsyncSession, post_id: int) -> database.Post:
-    post = await crud.get_item(db=db, item_id=post_id, model=database.Post)
-    return post
+async def get_post(post_id: int, db: AsyncSession) -> database.Post:
+    result = await db.execute(
+        select(database.Post)
+        .options(selectinload(database.Post.comments))
+        .where(database.Post.id == post_id)
+    )
+    return result.scalars().first()
 
 async def create_post(db: AsyncSession, post_data: schemas.PostCreate):
     post = database.Post(
@@ -27,7 +32,7 @@ async def delete_post(db: AsyncSession, post_id: int, author_id: int):
     if post.author_id != author_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="You do not have permission to delete this comment."
+            detail="You do not have permission to delete this post."
         )
     await db.delete(post)
     await db.commit()
@@ -48,3 +53,4 @@ async def update_post(post_id: int, db: AsyncSession, post_data: schemas.PostUpd
     db.commit()
     db.refresh(post)
     return post
+

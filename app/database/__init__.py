@@ -1,3 +1,2 @@
-from .models import User
-from .models import Post
+from .models import User, Post, Comment
 __all__ = ["User", "Post"]
