@@ -1,7 +1,7 @@
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from ..schemas import CommentCreate
-from .. import database, crud
+from .. import database, crud, schemas
 from fastapi import HTTPException, status
 
 async def get_comment(db: AsyncSession, comment_id: int) -> database.Comment:
@@ -29,3 +29,19 @@ async def delete_comment(comment_id: int, db: AsyncSession, author_id: int):
     await db.delete(comment)
     await db.commit()
     return {"message": "Comment has been deleted successfully"}
+
+async def update_comment(comment_id: int, db: AsyncSession, comment_data: schemas.CommentUpdate, author_id: int):
+    comment = await get_comment(db=db, comment_id=comment_id)
+    if comment.author_id != author_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to change this comment."
+        )
+    
+    for var, value in vars(comment_data).items():
+        setattr(comment, var, value) if value else None
+
+    db.add(comment)
+    db.commit()
+    db.refresh(comment)
+    return comment

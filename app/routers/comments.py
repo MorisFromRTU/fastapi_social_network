@@ -32,3 +32,16 @@ async def delete_comment(
         comment_id=comment_id, 
         author_id=current_user.id, 
         db=db)
+
+@router.patch('/{comment_id}')
+async def update_comment(
+    comment_id: int,
+    comment_data: schemas.CommentUpdate,
+    current_user: schemas.User = Depends(auth.get_current_user),
+    db: AsyncSession = Depends(db.get_db)
+):
+    return await crud.update_comment(
+        comment_id=comment_id, 
+        comment_data=comment_data,
+        author_id=current_user.id, 
+        db=db)
